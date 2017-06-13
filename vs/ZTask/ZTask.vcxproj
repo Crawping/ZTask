@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{58DFF972-C7B0-4D3D-9689-4FD3BB3E95EC}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ZTask</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)..\bin\$(Platform)\$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)..\build\$(Platform)\$(Configuration)\$(ProjectName)</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\libuv\include;..\..\libuv\src;..\..\include;..\..\duktape\;..\..\lua\src;..\..\src;..\..\jemalloc\include\jemalloc;..\..\jemalloc\include\msvc_compat</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4146</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\tool;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN64;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\libuv\include;..\..\libuv\src;..\..\include;..\..\duktape\;..\..\lua\src;..\..\src;..\..\jemalloc\include\jemalloc;..\..\jemalloc\include\msvc_compat</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4146</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\..\tool;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;BUILDING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\libuv\include;..\..\libuv\src;..\..\include;..\..\duktape\;..\..\lua\src;..\..\src;..\..\jemalloc\include\jemalloc;..\..\jemalloc\include\msvc_compat</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <DisableSpecificWarnings>4996;4146</DisableSpecificWarnings>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\tool;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;jemalloc.lib;duktape.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN64;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;BUILDING;NOUSE_JEMALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\libuv\include;..\..\libuv\src;..\..\include;..\..\lua\src;..\..\duktape\;..\..\src;..\..\jemalloc\include\jemalloc;..\..\jemalloc\include\msvc_compat</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996;4146</DisableSpecificWarnings>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\tool;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;duktape.lib;jemalloc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\libuv\src\fs-poll.c" />
+    <ClCompile Include="..\..\libuv\src\inet.c" />
+    <ClCompile Include="..\..\libuv\src\threadpool.c" />
+    <ClCompile Include="..\..\libuv\src\uv-common.c" />
+    <ClCompile Include="..\..\libuv\src\version.c" />
+    <ClCompile Include="..\..\libuv\src\win\async.c" />
+    <ClCompile Include="..\..\libuv\src\win\core.c" />
+    <ClCompile Include="..\..\libuv\src\win\detect-wakeup.c" />
+    <ClCompile Include="..\..\libuv\src\win\dl.c" />
+    <ClCompile Include="..\..\libuv\src\win\error.c" />
+    <ClCompile Include="..\..\libuv\src\win\fs-event.c" />
+    <ClCompile Include="..\..\libuv\src\win\fs.c" />
+    <ClCompile Include="..\..\libuv\src\win\getaddrinfo.c" />
+    <ClCompile Include="..\..\libuv\src\win\getnameinfo.c" />
+    <ClCompile Include="..\..\libuv\src\win\handle.c" />
+    <ClCompile Include="..\..\libuv\src\win\loop-watcher.c" />
+    <ClCompile Include="..\..\libuv\src\win\pipe.c" />
+    <ClCompile Include="..\..\libuv\src\win\poll.c" />
+    <ClCompile Include="..\..\libuv\src\win\process-stdio.c" />
+    <ClCompile Include="..\..\libuv\src\win\process.c" />
+    <ClCompile Include="..\..\libuv\src\win\req.c" />
+    <ClCompile Include="..\..\libuv\src\win\signal.c" />
+    <ClCompile Include="..\..\libuv\src\win\snprintf.c" />
+    <ClCompile Include="..\..\libuv\src\win\stream.c" />
+    <ClCompile Include="..\..\libuv\src\win\tcp.c" />
+    <ClCompile Include="..\..\libuv\src\win\thread.c" />
+    <ClCompile Include="..\..\libuv\src\win\timer.c" />
+    <ClCompile Include="..\..\libuv\src\win\tty.c" />
+    <ClCompile Include="..\..\libuv\src\win\udp.c" />
+    <ClCompile Include="..\..\libuv\src\win\util.c" />
+    <ClCompile Include="..\..\libuv\src\win\winapi.c" />
+    <ClCompile Include="..\..\libuv\src\win\winsock.c" />
+    <ClCompile Include="..\..\src\coroutine.c" />
+    <ClCompile Include="..\..\src\lualib\lpeg\lpcap.c" />
+    <ClCompile Include="..\..\src\lualib\lpeg\lpcode.c" />
+    <ClCompile Include="..\..\src\lualib\lpeg\lptree.c" />
+    <ClCompile Include="..\..\src\lualib\lpeg\lpvm.c" />
+    <ClCompile Include="..\..\src\lualib\lsha1.c" />
+    <ClCompile Include="..\..\src\lualib\lua-bson.c" />
+    <ClCompile Include="..\..\src\lualib\lua-clientsocket.c" />
+    <ClCompile Include="..\..\src\lualib\lua-cluster.c" />
+    <ClCompile Include="..\..\src\lualib\lua-crypt.c" />
+    <ClCompile Include="..\..\src\lualib\lua-debugchannel.c" />
+    <ClCompile Include="..\..\src\lualib\lua-memory.c" />
+    <ClCompile Include="..\..\src\lualib\lua-mongo.c" />
+    <ClCompile Include="..\..\src\lualib\lua-multicast.c" />
+    <ClCompile Include="..\..\src\lualib\lua-mysqlaux.c" />
+    <ClCompile Include="..\..\src\lualib\lua-netpack.c" />
+    <ClCompile Include="..\..\src\lualib\lua-profile.c" />
+    <ClCompile Include="..\..\src\lualib\lua-seri.c" />
+    <ClCompile Include="..\..\src\lualib\lua-sharedata.c" />
+    <ClCompile Include="..\..\src\lualib\lua-skynet.c" />
+    <ClCompile Include="..\..\src\lualib\lua-socket.c" />
+    <ClCompile Include="..\..\src\lualib\lua-stm.c" />
+    <ClCompile Include="..\..\src\lualib\sproto\lsproto.c" />
+    <ClCompile Include="..\..\src\lualib\sproto\sproto.c" />
+    <ClCompile Include="..\..\src\main.c" />
+    <ClCompile Include="..\..\src\malloc_hook.c" />
+    <ClCompile Include="..\..\src\server\service_harbor.c" />
+    <ClCompile Include="..\..\src\server\service_logger.c" />
+    <ClCompile Include="..\..\src\server\service_snc.c" />
+    <ClCompile Include="..\..\src\server\service_snlua.c" />
+    <ClCompile Include="..\..\src\socket_server.c" />
+    <ClCompile Include="..\..\src\ztask_daemon.c" />
+    <ClCompile Include="..\..\src\ztask_env.c" />
+    <ClCompile Include="..\..\src\ztask_error.c" />
+    <ClCompile Include="..\..\src\ztask_handle.c" />
+    <ClCompile Include="..\..\src\ztask_harbor.c" />
+    <ClCompile Include="..\..\src\ztask_log.c" />
+    <ClCompile Include="..\..\src\ztask_main.c" />
+    <ClCompile Include="..\..\src\ztask_module.c" />
+    <ClCompile Include="..\..\src\ztask_monitor.c" />
+    <ClCompile Include="..\..\src\ztask_mq.c" />
+    <ClCompile Include="..\..\src\ztask_server.c" />
+    <ClCompile Include="..\..\src\ztask_socket.c" />
+    <ClCompile Include="..\..\src\ztask_start.c" />
+    <ClCompile Include="..\..\src\ztask_timer.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\libuv\include\stdint-msvc2008.h" />
+    <ClInclude Include="..\..\libuv\include\tree.h" />
+    <ClInclude Include="..\..\libuv\include\uv-errno.h" />
+    <ClInclude Include="..\..\libuv\include\uv-version.h" />
+    <ClInclude Include="..\..\libuv\include\uv-win.h" />
+    <ClInclude Include="..\..\libuv\include\uv.h" />
+    <ClInclude Include="..\..\libuv\src\heap-inl.h" />
+    <ClInclude Include="..\..\libuv\src\queue.h" />
+    <ClInclude Include="..\..\libuv\src\uv-common.h" />
+    <ClInclude Include="..\..\libuv\src\win\atomicops-inl.h" />
+    <ClInclude Include="..\..\libuv\src\win\handle-inl.h" />
+    <ClInclude Include="..\..\libuv\src\win\internal.h" />
+    <ClInclude Include="..\..\libuv\src\win\req-inl.h" />
+    <ClInclude Include="..\..\libuv\src\win\stream-inl.h" />
+    <ClInclude Include="..\..\libuv\src\win\winapi.h" />
+    <ClInclude Include="..\..\libuv\src\win\winsock.h" />
+    <ClInclude Include="..\..\src\atomic.h" />
+    <ClInclude Include="..\..\src\coroutine.h" />
+    <ClInclude Include="..\..\src\lualib\lpeg\lpcap.h" />
+    <ClInclude Include="..\..\src\lualib\lpeg\lpcode.h" />
+    <ClInclude Include="..\..\src\lualib\lpeg\lptree.h" />
+    <ClInclude Include="..\..\src\lualib\lpeg\lptypes.h" />
+    <ClInclude Include="..\..\src\lualib\lpeg\lpvm.h" />
+    <ClInclude Include="..\..\src\lualib\lua-seri.h" />
+    <ClInclude Include="..\..\src\lualib\sproto\msvcint.h" />
+    <ClInclude Include="..\..\src\lualib\sproto\sproto.h" />
+    <ClInclude Include="..\..\src\malloc_hook.h" />
+    <ClInclude Include="..\..\src\server\service_harbor.h" />
+    <ClInclude Include="..\..\src\server\service_logger.h" />
+    <ClInclude Include="..\..\src\server\service_snc.h" />
+    <ClInclude Include="..\..\src\server\service_snlua.h" />
+    <ClInclude Include="..\..\src\socket_server.h" />
+    <ClInclude Include="..\..\src\spinlock.h" />
+    <ClInclude Include="..\..\src\ztask.h" />
+    <ClInclude Include="..\..\src\ztask_daemon.h" />
+    <ClInclude Include="..\..\src\ztask_env.h" />
+    <ClInclude Include="..\..\src\ztask_handle.h" />
+    <ClInclude Include="..\..\src\ztask_harbor.h" />
+    <ClInclude Include="..\..\src\ztask_log.h" />
+    <ClInclude Include="..\..\src\ztask_module.h" />
+    <ClInclude Include="..\..\src\ztask_monitor.h" />
+    <ClInclude Include="..\..\src\ztask_mq.h" />
+    <ClInclude Include="..\..\src\ztask_server.h" />
+    <ClInclude Include="..\..\src\ztask_socket.h" />
+    <ClInclude Include="..\..\src\ztask_start.h" />
+    <ClInclude Include="..\..\src\ztask_timer.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
