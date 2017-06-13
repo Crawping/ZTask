@@ -114,6 +114,7 @@ struct request_open {
     int id;
     int port;
     uintptr_t opaque;
+    int session;
     char host[1];
 };
 
@@ -142,6 +143,7 @@ struct request_listen {
     int id;
     int backlog;
     uintptr_t opaque;
+    int session;
     int family;
     struct sockaddr addr;
     char host[1];
@@ -156,6 +158,7 @@ struct request_bind {
 struct request_start {
     int id;
     uintptr_t opaque;
+    int session;
 };
 
 struct request_setopt {
@@ -344,11 +347,9 @@ cmd_cb(uv_async_t* handle) {
         free_request_package(&msg, NULL);
         if (ret != -1) {
             ss->cb(ret, &result);
-            break;
+            //FREE(w);
+            //break;
         }
-
-
-
         FREE(w);
     }
 }
@@ -860,8 +861,13 @@ listen_socket(struct socket_server *ss, struct request_listen * request, struct 
         return -1;
     }
     s->s.tcp.data = (void *)request->backlog; // 把backlog存在data里面
-    s->type = SOCKET_TYPE_PLISTEN;
-    return -1;
+    s->type = SOCKET_TYPE_PLISTEN;//此类型在start的时候会启动监听
+    result->opaque = request->opaque;
+    result->session = request->session;
+    result->id = id;
+    result->ud = 0;
+    result->data = NULL;
+    return SOCKET_BIND;
 _failed:
     result->opaque = request->opaque;
     result->id = id;
@@ -920,6 +926,7 @@ start_socket(struct socket_server *ss, struct request_start *request, struct soc
     int id = request->id;
     result->id = id;
     result->opaque = request->opaque;
+    result->session = request->session;
     result->ud = 0;
     result->data = NULL;
     struct socket *s = &ss->slot[HASH_ID(id)];
@@ -1141,7 +1148,7 @@ send_request(struct socket_server *ss, struct request_package *request, char typ
 }
 
 static int
-open_request(struct socket_server *ss, struct request_package *req, uintptr_t opaque, const char *addr, int port) {
+open_request(struct socket_server *ss, struct request_package *req, uintptr_t opaque, int session, const char *addr, int port) {
     int len = strlen(addr);
     if (len + sizeof(req->u.open) > 256) {
         fprintf(stderr, "socket-server : Invalid addr %s.\n", addr);
@@ -1151,6 +1158,7 @@ open_request(struct socket_server *ss, struct request_package *req, uintptr_t op
     if (id < 0)
         return -1;
     req->u.open.opaque = opaque;
+    req->u.open.session = session;
     req->u.open.id = id;
     req->u.open.port = port;
     memcpy(req->u.open.host, addr, len);
@@ -1160,9 +1168,9 @@ open_request(struct socket_server *ss, struct request_package *req, uintptr_t op
 }
 
 int
-socket_server_connect(struct socket_server *ss, uintptr_t opaque, const char * addr, int port) {
+socket_server_connect(struct socket_server *ss, uintptr_t opaque, int session, const char * addr, int port) {
     struct request_package request;
-    int len = open_request(ss, &request, opaque, addr, port);
+    int len = open_request(ss, &request, opaque,session, addr, port);
     if (len < 0)
         return -1;
     send_request(ss, &request, 'O', sizeof(request.u.open) + len);
@@ -1256,7 +1264,7 @@ do_getaddr(const char *host, int port, int protocol, int *family, struct sockadd
 }
 
 int
-socket_server_listen(struct socket_server *ss, uintptr_t opaque, const char * addr, int port, int backlog) {
+socket_server_listen(struct socket_server *ss, uintptr_t opaque, int session, const char * addr, int port, int backlog) {
     struct request_package request;
     if (do_getaddr(addr, port, IPPROTO_TCP, &request.u.listen.family, &request.u.listen.addr) != 0) {
         return -1;
@@ -1267,6 +1275,7 @@ socket_server_listen(struct socket_server *ss, uintptr_t opaque, const char * ad
         return id;
     }
     request.u.listen.opaque = opaque;
+    request.u.listen.session = session;
     request.u.listen.id = id;
     request.u.listen.backlog = backlog;
     send_request(ss, &request, 'L', sizeof(request.u.listen));
@@ -1287,10 +1296,11 @@ socket_server_bind(struct socket_server *ss, uintptr_t opaque, int fd) {
 }
 
 void
-socket_server_start(struct socket_server *ss, uintptr_t opaque, int id) {
+socket_server_start(struct socket_server *ss, uintptr_t opaque, int session, int id) {
     struct request_package request;
     request.u.start.id = id;
     request.u.start.opaque = opaque;
+    request.u.start.session = session;
     send_request(ss, &request, 'S', sizeof(request.u.start));
 }
 

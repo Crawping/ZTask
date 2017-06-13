@@ -1,6 +1,7 @@
 ﻿#include "ztask.h"
 #include "coroutine.h"
-
+#include "../ztask_server.h"
+#include "../socket_server.h"
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,32 +10,61 @@
 struct snc {
     struct ztask_context * ctx;
     ztask_cb _cb;
-
+    void *ud;
 
 };
-//转发callback
-static int _cb(struct ztask_context * context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
-
-
-
+//封装异步操作
+int ztask_snc_socket_listen(struct ztask_context *ctx, const char *host, int port, int backlog) {
+    coenv_t evn = ztask_current_coroutine();
+    int id = coroutine_current(evn);
+    int ret = ztask_socket_listen(ctx, id, host, port, backlog);
+    //连接是个异步调用,所以切出当前协程
+    coroutine_yield(evn);
+    return ret;
+}
+void ztask_snc_socket_start(struct ztask_context *ctx, int fd) {
+    coenv_t evn = ztask_current_coroutine();
+    int id = coroutine_current(evn);
+    ztask_socket_start(ctx, id, fd);
+    //连接是个异步调用,所以切出当前协程
+    coroutine_yield(evn);
 }
 
+
+//转发callback
+static int _cb(struct ztask_context * context, struct snc *l, int type, int session, uint32_t source, const void * msg, size_t sz) {
+    //切回请求的协程
+    coroutine_resume(ztask_current_coroutine(), session);
+    //l->_cb(context, l->ud, type, session, source, msg, sz);
+}
+
+
+void _func(coenv_t t, void *context, void *ud, int type, int session, uint32_t source, struct ztask_snc * args, size_t sz) {
+    return args->_init_cb(context, NULL, NULL);
+}
 static int init_cb(struct snc *l, struct ztask_context *ctx, struct ztask_snc * args, size_t sz) {
     if (sizeof(struct ztask_snc) != sz)
         return -1;
     l->_cb = args->_cb;
     if (!args->_init_cb)
         return -1;
-    int err = args->_init_cb(ctx, args, sz);
-    if (err)
-        return 1;
+    //设置回调函数
     ztask_callback(ctx, l, _cb);
+    coenv_t s = ztask_current_coroutine();
+    //创建一个协程,用来执行初始化操作,因为初始化过程不能保证没有同步操作
+    int id = coroutine_new(s, _func, ctx, l, NULL, NULL, NULL, args, sz);
+    //执行协程,会切出当前流程
+    void *ud = coroutine_resume(s, id);
+    //协程执完毕,切回当前流程
+    //if (!ud)
+    //    return -1;
+    l->ud = ud;
     return 0;
 }
 //此回调保证在业务线程被调用
 static int launch_cb(struct ztask_context * context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
     assert(type == 0 && session == 0);
-    struct snlua *l = ud;
+    struct snc *l = ud;
     ztask_callback(context, NULL, NULL);
     int err = init_cb(l, context, msg, sz);
     if (err) {

@@ -1,4 +1,4 @@
-#ifndef ZTASK_H
+ï»¿#ifndef ZTASK_H
 #define ZTASK_H
 
 #include <stddef.h>
@@ -23,67 +23,67 @@
 # define ZTASK_EXTERN /* nothing */
 #endif
 
-#define PTYPE_TEXT 0
-#define PTYPE_RESPONSE 1
+#define PTYPE_TEXT 0        //æ–‡æœ¬æ¶ˆæ¯
+#define PTYPE_RESPONSE 1    //è¿”å›æ¶ˆæ¯
 #define PTYPE_MULTICAST 2
 #define PTYPE_CLIENT 3
-#define PTYPE_SYSTEM 4
+#define PTYPE_SYSTEM 4      //ç³»ç»Ÿæ¶ˆæ¯
 #define PTYPE_HARBOR 5
-#define PTYPE_SOCKET 6
-#define PTYPE_ERROR 7	
+#define PTYPE_SOCKET 6      //ioæ¶ˆæ¯
+#define PTYPE_ERROR 7       //é”™è¯¯æ¶ˆæ¯
 
 
 #define PTYPE_TAG_DONTCOPY 0x10000
 #define PTYPE_TAG_ALLOCSESSION 0x20000
 /*
-µ÷¶ÈÆ÷Æô¶¯Á÷³Ì,ÈÕÖ¾·şÎñ,bootstrap·şÎñ
-·şÎñ¼ÄÉúÓÚÄ£¿é,¾ßÌå·şÎñÔÚµ÷¶ÈÆ÷²ãÃæ²»¿É¼û,²»Í¬ÊµÏÖµÄ·şÎñÓÉ¶ÔÓ¦µÄÄ£¿é¼ÓÔØ,Ä£¿éÊµÏÖÓ¦¸ÃÎªÖĞ¼ä¼ş,Ò²ÔÊĞí´æÔÚÄ£¿é¼´·şÎñµÄĞÎÌ¬
-·şÎñ´´½¨³É¹¦ºó»á·ÖÅäÈ«¾ÖÎ¨Ò»µÄidºÅ,¸ß8Î»Îª½Úµãid,µÍ24Î»Îª±¾µØÎ¨Ò»id
-Ã¿¸ö·şÎñ¶¼ÓĞ×Ô¼ºµÄcontext
+è°ƒåº¦å™¨å¯åŠ¨æµç¨‹,æ—¥å¿—æœåŠ¡,bootstrapæœåŠ¡
+æœåŠ¡å¯„ç”Ÿäºæ¨¡å—,å…·ä½“æœåŠ¡åœ¨è°ƒåº¦å™¨å±‚é¢ä¸å¯è§,ä¸åŒå®ç°çš„æœåŠ¡ç”±å¯¹åº”çš„æ¨¡å—åŠ è½½,æ¨¡å—å®ç°åº”è¯¥ä¸ºä¸­é—´ä»¶,ä¹Ÿå…è®¸å­˜åœ¨æ¨¡å—å³æœåŠ¡çš„å½¢æ€
+æœåŠ¡åˆ›å»ºæˆåŠŸåä¼šåˆ†é…å…¨å±€å”¯ä¸€çš„idå·,é«˜8ä½ä¸ºèŠ‚ç‚¹id,ä½24ä½ä¸ºæœ¬åœ°å”¯ä¸€id
+æ¯ä¸ªæœåŠ¡éƒ½æœ‰è‡ªå·±çš„context
 */
 struct ztask_context;
 struct ztask_config {
-    int thread;                 //ÒµÎñÏß³ÌÊı
-    int harbor;                 //½Úµãid
+    int thread;                 //ä¸šåŠ¡çº¿ç¨‹æ•°
+    int harbor;                 //èŠ‚ç‚¹id
     int profile;                //
-    const char * daemon;        //ÊØ»¤Ä£Ê½,½öunix
-    const char * module_path;   //Ä£¿é²éÕÒÂ·¾¶
-    const char * bootstrap;     //bootstrap·şÎñ
-    const char * bootstrap_parm;//bootstrap·şÎñ²ÎÊı
-    size_t bootstrap_parm_sz;//²ÎÊı³¤¶È
-    const char * logservice;    //ÈÕÖ¾·şÎñ
-    const char * logger;        //ÈÕÖ¾ÎÄ¼ş,²»¶¨ÒåÔò´òÓ¡µ½¿ØÖÆÌ¨
+    const char * daemon;        //å®ˆæŠ¤æ¨¡å¼,ä»…unix
+    const char * module_path;   //æ¨¡å—æŸ¥æ‰¾è·¯å¾„
+    const char * bootstrap;     //bootstrapæœåŠ¡
+    const char * bootstrap_parm;//bootstrapæœåŠ¡å‚æ•°
+    size_t bootstrap_parm_sz;//å‚æ•°é•¿åº¦
+    const char * logservice;    //æ—¥å¿—æœåŠ¡
+    const char * logger;        //æ—¥å¿—æ–‡ä»¶,ä¸å®šä¹‰åˆ™æ‰“å°åˆ°æ§åˆ¶å°
     
 };
 ZTASK_EXTERN void ztask_init();
 ZTASK_EXTERN void ztask_uninit();
-//Æô¶¯µ÷¶ÈÆ÷
+//å¯åŠ¨è°ƒåº¦å™¨
 ZTASK_EXTERN void ztask_start(struct ztask_config * config);
 
-//Êä³öµ÷ÊÔĞÅÏ¢
+//è¾“å‡ºè°ƒè¯•ä¿¡æ¯
 ZTASK_EXTERN void ztask_error(struct ztask_context * context, const char *msg, ...);
-//µ÷ÓÃ¿ØÖÆº¯Êı,Ò»°ãÓÉÃ»ÓĞµ×²ãµ÷ÓÃÄÜÁ¦µÄ½Å±¾ÀàÄ£¿éÊ¹ÓÃ
+//è°ƒç”¨æ§åˆ¶å‡½æ•°,ä¸€èˆ¬ç”±æ²¡æœ‰åº•å±‚è°ƒç”¨èƒ½åŠ›çš„è„šæœ¬ç±»æ¨¡å—ä½¿ç”¨
 ZTASK_EXTERN const char * ztask_command(struct ztask_context * context, const char * cmd , const char * parm);
-//´´½¨Ò»¸öÉÏÏÂÎÄ,µÈÍ¬·şÎñ
+//åˆ›å»ºä¸€ä¸ªä¸Šä¸‹æ–‡,ç­‰åŒæœåŠ¡
 ZTASK_EXTERN struct ztask_context * ztask_context_new(const char * name, const char * parm, const size_t sz);
-//ÓÃ¹ıÉÏÏÂÎÄ²éÑ¯handle
+//ç”¨è¿‡ä¸Šä¸‹æ–‡æŸ¥è¯¢handle
 ZTASK_EXTERN uint32_t ztask_context_handle(struct ztask_context *);
-//Ãû³Æ²éÑ¯handle
+//åç§°æŸ¥è¯¢handle
 ZTASK_EXTERN uint32_t ztask_queryname(struct ztask_context * context, const char * name);
-//Í¨¹ıhandle·¢ËÍÏûÏ¢
+//é€šè¿‡handleå‘é€æ¶ˆæ¯
 ZTASK_EXTERN int ztask_send(struct ztask_context * context, uint32_t source, uint32_t destination , int type, int session, void * msg, size_t sz);
-//Í¨¹ıÃû³Æ·¢ËÍÏûÏ¢
+//é€šè¿‡åç§°å‘é€æ¶ˆæ¯
 ZTASK_EXTERN int ztask_sendname(struct ztask_context * context, uint32_t source, const char * destination , int type, int session, void * msg, size_t sz);
 
-//ÊÇ·ñÊÇÔ¶³Ì·şÎñ
+//æ˜¯å¦æ˜¯è¿œç¨‹æœåŠ¡
 ZTASK_EXTERN int ztask_isremote(struct ztask_context *, uint32_t handle, int * harbor);
 
-//ÉèÖÃ»Øµ÷µØÖ·
+//è®¾ç½®å›è°ƒåœ°å€
 typedef int (*ztask_cb)(struct ztask_context * context, void *ud, int type, int session, uint32_t source , const void * msg, size_t sz);
 ZTASK_EXTERN void ztask_callback(struct ztask_context * context, void *ud, ztask_cb cb);
 
 
-//»ñµÃÏß³Ìµ±Ç°µÄhandle
+//è·å¾—çº¿ç¨‹å½“å‰çš„handle
 ZTASK_EXTERN uint32_t ztask_current_handle(void);
 ZTASK_EXTERN uint64_t ztask_now(void);
 #if defined(WIN32) || defined(WIN64)
@@ -91,35 +91,22 @@ ZTASK_EXTERN void usleep(uint32_t us);
 ZTASK_EXTERN char *strsep(char **s, const char *ct);
 #endif
 
-//ioÏà¹Ø
-ZTASK_EXTERN int ztask_socket_send(struct ztask_context *ctx, int id, void *buffer, int sz);
-ZTASK_EXTERN int ztask_socket_send_lowpriority(struct ztask_context *ctx, int id, void *buffer, int sz);
-ZTASK_EXTERN int ztask_socket_listen(struct ztask_context *ctx, const char *host, int port, int backlog);
-ZTASK_EXTERN int ztask_socket_connect(struct ztask_context *ctx, const char *host, int port);
-ZTASK_EXTERN int ztask_socket_bind(struct ztask_context *ctx, int fd);
-ZTASK_EXTERN void ztask_socket_close(struct ztask_context *ctx, int id);
-ZTASK_EXTERN void ztask_socket_shutdown(struct ztask_context *ctx, int id);
-ZTASK_EXTERN void ztask_socket_start(struct ztask_context *ctx, int id);
-ZTASK_EXTERN void ztask_socket_nodelay(struct ztask_context *ctx, int id);
 
-ZTASK_EXTERN int ztask_socket_udp(struct ztask_context *ctx, const char * addr, int port);
-ZTASK_EXTERN int ztask_socket_udp_connect(struct ztask_context *ctx, int id, const char * addr, int port);
-ZTASK_EXTERN int ztask_socket_udp_send(struct ztask_context *ctx, int id, const char * address, const void *buffer, int sz);
-ZTASK_EXTERN const char * ztask_socket_udp_address(struct ztask_socket_message *, int *addrsz);
-
-
-/*Ä£¿éÏà¹Ø*/
-//cÄ£¿éÆô¶¯²ÎÊı
+/*æ¨¡å—ç›¸å…³*/
+//cæ¨¡å—å¯åŠ¨å‚æ•°
 
 typedef int(*ztask_snc_init_cb)(struct ztask_context * context, const void * msg, size_t sz);
 struct ztask_snc {
     ztask_cb _cb;
     ztask_snc_init_cb _init_cb;
 };
+//cæ¨¡å—å°è£…å‡½æ•°
+ZTASK_EXTERN int ztask_snc_socket_listen(struct ztask_context *ctx, const char *host, int port, int backlog);
+ZTASK_EXTERN void ztask_snc_socket_start(struct ztask_context *ctx, int id);
 
 
 
-/*ÄÚ´æÏà¹Ø*/
+/*å†…å­˜ç›¸å…³*/
 #include <stddef.h>
 #include <malloc.h>
 #ifndef USE_JEMALLOC

@@ -1,15 +1,17 @@
-#ifndef ZTASK_SERVER_H
+﻿#ifndef ZTASK_SERVER_H
 #define ZTASK_SERVER_H
 
 #include <stdint.h>
 #include <stdlib.h>
-
+#include "coroutine.h"
 struct ztask_context;
 struct ztask_message;
 struct ztask_monitor;
 
 void ztask_context_grab(struct ztask_context *);
 void ztask_context_reserve(struct ztask_context *ctx);
+//获得线程的协程对象
+coenv_t ztask_current_coroutine(void);
 struct ztask_context * ztask_context_release(struct ztask_context *);
 int ztask_context_push(uint32_t handle, struct ztask_message *message);
 void ztask_context_send(struct ztask_context * context, void * msg, size_t sz, uint32_t source, int type, int session);

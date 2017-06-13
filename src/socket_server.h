@@ -10,12 +10,14 @@
 #define SOCKET_ERR 4
 #define SOCKET_EXIT 5
 #define SOCKET_UDP 6
+#define SOCKET_BIND 7
 
 struct socket_server;
 
 struct socket_message {
     size_t id;
     uintptr_t opaque;
+    int session;
     size_t ud;	// for accept, ud is listen id ; for data, ud is size of data 
     char * data;
 };
@@ -27,15 +29,15 @@ int socket_server_poll(struct socket_server *);
 void socket_server_exit(struct socket_server *);
 void socket_server_close(struct socket_server *, uintptr_t opaque, int id);
 void socket_server_shutdown(struct socket_server *ss, uintptr_t opaque, int id);
-void socket_server_start(struct socket_server *, uintptr_t opaque, int id);
+void socket_server_start(struct socket_server *, uintptr_t opaque, int session, int id);
 
 // return -1 when error
 int64_t socket_server_send(struct socket_server *, int id, const void * buffer, int sz);
 int socket_server_send_lowpriority(struct socket_server *, int id, const void * buffer, int sz);
 
 // ctrl command below returns id
-int socket_server_listen(struct socket_server *, uintptr_t opaque, const char * addr, int port, int backlog);
-int socket_server_connect(struct socket_server *, uintptr_t opaque, const char * addr, int port);
+int socket_server_listen(struct socket_server *, uintptr_t opaque, int session, const char * addr, int port, int backlog);
+int socket_server_connect(struct socket_server *, uintptr_t opaque, int session, const char * addr, int port);
 int socket_server_bind(struct socket_server *, uintptr_t opaque, int fd);
 
 // for tcp

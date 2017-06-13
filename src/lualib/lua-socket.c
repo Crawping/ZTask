@@ -446,7 +446,7 @@ lconnect(lua_State *L) {
 		return luaL_error(L, "Invalid port");
 	}
 	struct ztask_context * ctx = lua_touserdata(L, lua_upvalueindex(1));
-	int id = ztask_socket_connect(ctx, host, port);
+    int id = ztask_socket_connect(ctx, NULL, host, port);
 	lua_pushinteger(L, id);
 
 	return 1;
@@ -474,7 +474,7 @@ llisten(lua_State *L) {
 	int port = luaL_checkinteger(L,2);
 	int backlog = luaL_optinteger(L,3,BACKLOG);
 	struct ztask_context * ctx = lua_touserdata(L, lua_upvalueindex(1));
-	int id = ztask_socket_listen(ctx, host,port,backlog);
+    int id = ztask_socket_listen(ctx, NULL, host, port, backlog);
 	if (id < 0) {
 		return luaL_error(L, "Listen error");
 	}
@@ -582,7 +582,7 @@ static int
 lstart(lua_State *L) {
 	struct ztask_context * ctx = lua_touserdata(L, lua_upvalueindex(1));
 	int id = luaL_checkinteger(L, 1);
-	ztask_socket_start(ctx,id);
+    ztask_socket_start(ctx, NULL, id);
 	return 0;
 }
 

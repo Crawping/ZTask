@@ -1,4 +1,4 @@
-#include "ztask.h"
+ï»¿#include "ztask.h"
 #include "ztask_start.h"
 #include "ztask_server.h"
 #include "ztask_mq.h"
@@ -23,7 +23,7 @@
 #include "server/service_logger.h"
 #include "server/service_snlua.h"
 #include "server/service_harbor.h"
-//¼àÊÓÆ÷
+//ç›‘è§†å™¨
 struct monitor {
     int count;
     struct ztask_monitor ** m;
@@ -32,7 +32,7 @@ struct monitor {
     int sleep;
     int quit;
 };
-//Ïß³Ì²ÎÊý
+//çº¿ç¨‹å‚æ•°
 struct worker_parm {
     struct monitor *m;
     int id;
@@ -87,7 +87,7 @@ static void free_monitor(struct monitor *m) {
     ztask_free(m->m);
     ztask_free(m);
 }
-//ioÏß³Ì
+//ioçº¿ç¨‹
 static void thread_socket(void *p) {
     struct monitor * m = p;
     ztask_initthread(THREAD_SOCKET);
@@ -102,7 +102,7 @@ static void thread_socket(void *p) {
         wakeup(m, 0);
     }
 }
-//¼à¿ØÏß³Ì
+//ç›‘æŽ§çº¿ç¨‹
 static void thread_monitor(void *p) {
     struct monitor * m = p;
     int i;
@@ -123,7 +123,7 @@ static void thread_monitor(void *p) {
         }
     }
 }
-//Ê±ÖÓÏß³Ì
+//æ—¶é’Ÿçº¿ç¨‹
 static void thread_timer(void *p) {
     struct monitor * m = p;
     ztask_initthread(THREAD_TIMER);
@@ -150,7 +150,7 @@ static void thread_timer(void *p) {
     uv_mutex_unlock(&m->mutex);
     return;
 }
-//ÒµÎñÏß³Ì
+//ä¸šåŠ¡çº¿ç¨‹
 static void thread_worker(void *p) {
     struct worker_parm *wp = p;
     int id = wp->id;
@@ -158,8 +158,6 @@ static void thread_worker(void *p) {
     struct monitor *m = wp->m;
     struct ztask_monitor *sm = m->m[id];
     ztask_initthread(THREAD_WORKER);
-    //½«ÒµÎñÏß³Ì×ª»»³ÉÏË³Ì
-    coroutine_init();
     struct message_queue * q = NULL;
     while (!m->quit) {
         q = ztask_context_message_dispatch(sm, q, weight);
@@ -228,7 +226,7 @@ static void start(int thread) {
 
     free_monitor(m);
 }
-//×¢²áÔ¤ÖÃÄ£¿é
+//æ³¨å†Œé¢„ç½®æ¨¡å—
 static void ztask_module_reg() {
     struct ztask_module *mod = NULL;
     mod = malloc(sizeof(*mod));
@@ -273,34 +271,34 @@ ZTASK_EXTERN void ztask_start(struct ztask_config * config) {
     //sigfillset(&sa.sa_mask);
     //sigaction(SIGHUP, &sa, NULL);
 
-    //¼ì²éÊÇ·ñÒÔÊØ»¤½ø³Ì·½Ê½Æô¶¯,winÔÝ²»Ö§³Ö
+    //æ£€æŸ¥æ˜¯å¦ä»¥å®ˆæŠ¤è¿›ç¨‹æ–¹å¼å¯åŠ¨,winæš‚ä¸æ”¯æŒ
     if (config->daemon) {
         if (daemon_init(config->daemon)) {
             exit(1);
         }
     }
-    //³õÊ¼»¯½Úµã¹ÜÀíÆ÷
+    //åˆå§‹åŒ–èŠ‚ç‚¹ç®¡ç†å™¨
     ztask_harbor_init(config->harbor);
-    //³õÊ¼»¯¾ä±ú¹ÜÀíÆ÷
+    //åˆå§‹åŒ–å¥æŸ„ç®¡ç†å™¨
     ztask_handle_init(config->harbor);
-    //³õÊ¼»¯¶ÓÁÐ
+    //åˆå§‹åŒ–é˜Ÿåˆ—
     ztask_mq_init();
-    //³õÊ¼»¯Ä£¿é¹ÜÀíÆ÷,Ö¸¶¨²éÕÒÂ·¾¶
+    //åˆå§‹åŒ–æ¨¡å—ç®¡ç†å™¨,æŒ‡å®šæŸ¥æ‰¾è·¯å¾„
     ztask_module_init(config->module_path);
-    //×¢²áÄ¬ÈÏÄ£¿é
+    //æ³¨å†Œé»˜è®¤æ¨¡å—
     ztask_module_reg();
-    //³õÊ¼»¯Ê±ÖÓ
+    //åˆå§‹åŒ–æ—¶é’Ÿ
     ztask_timer_init();
-    //³õÊ¼»¯io
+    //åˆå§‹åŒ–io
     ztask_socket_init();
     ztask_profile_enable(config->profile);
-    //²éÕÒÈÕÖ¾·þÎñ
+    //æŸ¥æ‰¾æ—¥å¿—æœåŠ¡
     struct ztask_context *logger = ztask_context_new(config->logservice, config->logger, config->logger ? strlen(config->logger) : NULL);
     if (logger == NULL) {
         fprintf(stderr, "Can't launch %s service\n", config->logservice);
         exit(1);
     }
-    //×Ô¾Ù
+    //è‡ªä¸¾
     struct ztask_context *ctx = ztask_context_new(config->bootstrap, config->bootstrap_parm, config->bootstrap_parm_sz);
     if (ctx == NULL) {
         ztask_error(NULL, "Bootstrap error : %s\n", config->bootstrap);
@@ -308,13 +306,13 @@ ZTASK_EXTERN void ztask_start(struct ztask_config * config) {
         exit(1);
     }
 
-    //Æô¶¯Ïß³Ì
+    //å¯åŠ¨çº¿ç¨‹
     start(config->thread);
 
     // harbor_exit may call socket send, so it should exit before socket_free
     ztask_harbor_exit();
     ztask_socket_free();
-    //ÍË³öÊØ»¤½ø³Ì,winÔÝ²»Ö§³Ö
+    //é€€å‡ºå®ˆæŠ¤è¿›ç¨‹,winæš‚ä¸æ”¯æŒ
     if (config->daemon) {
         daemon_exit(config->daemon);
     }

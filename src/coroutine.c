@@ -28,7 +28,14 @@ struct coroutine
     int state;
     coenv_t env;
     coroutine_func func;
+    void *result;
     void *context;
+    void *ud;
+    int type;
+    int session;
+    uint32_t source;
+    const void * msg;
+    size_t sz;
 #if defined(_WIN32) || defined(_WIN64)
     HANDLE fiber;
 #else
@@ -51,22 +58,28 @@ static void _proxyfunc(uint32_t low32, uint32_t hi32)
     uintptr_t ptr = (uintptr_t)low32 | ((uintptr_t)hi32 << 32);
     cort_t co = (cort_t)ptr;
 #endif
-    co->func(co->env, co->context);
+    co->result = co->func(co->env, co->context, co->ud, co->type, co->session, co->source, co->msg, co->sz);
     co->state = COROUTINE_END;
 #if defined(_WIN32) || defined(_WIN64)
     SwitchToFiber(co->main->fiber);
 #endif
 }
 
-static cort_t co_new(coenv_t env, cort_t main, coroutine_func func, void *context)
+static cort_t co_new(coenv_t env, cort_t main, coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
 {
     struct coroutine *co = ztask_malloc(sizeof(*co));
     co->state = COROUTINE_SUSPEND;
     co->env = env;
     co->func = func;
+    co->result = NULL;
     co->context = context;
     co->main = main;
-
+    co->ud = ud;
+    co->type = type;
+    co->session = session;
+    co->source = source;
+    co->msg = msg;
+    co->sz = sz;
 #if defined(_WIN32) || defined(_WIN64)
     co->fiber = CreateFiber(0, _proxyfunc, co);
 #else
@@ -101,6 +114,7 @@ static cort_t co_new_main()
     co->state = COROUTINE_RUNNING;
     co->env = NULL;
     co->func = NULL;
+    co->result = NULL;
     co->context = NULL;
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -193,13 +207,13 @@ static int _insert_env(coenv_t env, cort_t co)
     return -1;
 }
 
-int coroutine_new(coenv_t env, coroutine_func func, void *context)
+int coroutine_new(coenv_t env, coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
 {
-    cort_t co = co_new(env, env->main, func, context);
+    cort_t co = co_new(env, env->main, func, context, ud, type, session, source, msg, sz);
     return _insert_env(env, co);
 }
 
-void coroutine_resume(coenv_t env, int id)
+void *coroutine_resume(coenv_t env, int id)
 {
     if (0 <= id && id < env->cap)
     {
@@ -209,7 +223,7 @@ void coroutine_resume(coenv_t env, int id)
             env->running = id;
             co->state = COROUTINE_RUNNING;
             co_switch(env->main, co);
-
+            void *ret = co->result;
             if (co->state == COROUTINE_END)
             {
                 env->aco[id] = NULL;
@@ -217,11 +231,13 @@ void coroutine_resume(coenv_t env, int id)
                 env->running = -1;
                 co_delete(co);
             }
+            return ret;
         }
     }
+    return NULL;
 }
 
-void coroutine_yield(coenv_t env)
+void *coroutine_yield(coenv_t env)
 {
     int id = env->running;
     if (0 <= id && id < env->cap)
@@ -232,7 +248,12 @@ void coroutine_yield(coenv_t env)
             env->running = -1;
             co->state = COROUTINE_SUSPEND;
             co_switch(co, env->main);
+            return co->result;
         }
     }
+    return NULL;
 }
 
+int coroutine_current(coenv_t env) {
+    return env->running;
+}

@@ -37,6 +37,9 @@ void socket_server_cb(int type, struct socket_message *result)
     case SOCKET_UDP:
         forward_message(ZTASK_SOCKET_TYPE_UDP, false, result);
         break;
+    case SOCKET_BIND:
+        forward_message(ZTASK_SOCKET_TYPE_BIND, false, result);
+        break;
     default:
         ztask_error(NULL, "Unknown socket message type %d.", type);
     }
@@ -89,7 +92,10 @@ forward_message(int type, bool padding, struct socket_message * result) {
 
     struct ztask_message message;
     message.source = 0;
-    message.session = 0;
+    if (type == ZTASK_SOCKET_TYPE_CONNECT || type == ZTASK_SOCKET_TYPE_BIND)
+        message.session = result->session;
+    else
+        message.session = 0;
     message.data = sm;
     message.sz = sz | ((size_t)PTYPE_SOCKET << MESSAGE_TYPE_SHIFT);
 
@@ -136,15 +142,15 @@ ztask_socket_send_lowpriority(struct ztask_context *ctx, int id, void *buffer, i
 }
 
 int
-ztask_socket_listen(struct ztask_context *ctx, const char *host, int port, int backlog) {
+ztask_socket_listen(struct ztask_context *ctx, int session, const char *host, int port, int backlog) {
     uint32_t source = ztask_context_handle(ctx);
-    return socket_server_listen(SOCKET_SERVER, source, host, port, backlog);
+    return socket_server_listen(SOCKET_SERVER, source, session, host, port, backlog);
 }
 
 int
-ztask_socket_connect(struct ztask_context *ctx, const char *host, int port) {
+ztask_socket_connect(struct ztask_context *ctx, int session, const char *host, int port) {
     uint32_t source = ztask_context_handle(ctx);
-    return socket_server_connect(SOCKET_SERVER, source, host, port);
+    return socket_server_connect(SOCKET_SERVER, source, session, host, port);
 }
 
 int
@@ -166,9 +172,9 @@ ztask_socket_shutdown(struct ztask_context *ctx, int id) {
 }
 
 void
-ztask_socket_start(struct ztask_context *ctx, int id) {
+ztask_socket_start(struct ztask_context *ctx, int session, int id) {
     uint32_t source = ztask_context_handle(ctx);
-    socket_server_start(SOCKET_SERVER, source, id);
+    socket_server_start(SOCKET_SERVER, source,session, id);
 }
 
 void
