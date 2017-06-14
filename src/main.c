@@ -10,10 +10,8 @@ static int client_cb(struct ztask_context * ctx, struct snc *l, int type, int se
     return 0;
 }
 static int client_init(struct ztask_context * ctx, const void * msg, size_t sz) {
-    //int id=coroutine_current(ztask_current_coroutine());
     //ztask_socket_connect(ctx, 1, "127.0.0.1", 1234);
-    ////连接是个异步调用,所以切出当前协程
-    //coroutine_yield(ztask_current_coroutine());
+
 
     return 1;
 }
@@ -40,7 +38,7 @@ static int server_init(struct ztask_context * ctx, const void * msg, size_t sz) 
 int main(int argc, char *argv[]) {
     ztask_init();
     struct ztask_config config = { 0 };
-    config.thread =  1;
+    config.thread =  8;
     config.module_path = "./?.dll";
     config.harbor = 1;
     config.daemon = NULL;
@@ -56,6 +54,8 @@ int main(int argc, char *argv[]) {
 
 
     ztask_start(&config);
+    //等待线程退出
+    ztask_join();
     ztask_uninit();
     return 0;
 }

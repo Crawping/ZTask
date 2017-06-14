@@ -10,7 +10,7 @@
 #include "ztask_daemon.h"
 #include "ztask_harbor.h"
 #include "coroutine.h"
-
+#include "atomic.h"
 #include <uv.h>
 #include <assert.h>
 #include <stdio.h>
@@ -40,6 +40,10 @@ struct worker_parm {
 };
 
 static int SIG = 0;
+static int thread_worker_num = 0;//业务线程数
+static int thread_ready_num = 0;//已就绪线程数
+static uv_thread_t *pid = NULL;//线程句柄数组
+static struct monitor *m = NULL;//监视器数组
 #define CHECK_ABORT if (ztask_context_total()==0) break;
 
 static void handle_hup(int signal) {
@@ -89,8 +93,8 @@ static void free_monitor(struct monitor *m) {
 }
 //io线程
 static void thread_socket(void *p) {
-    struct monitor * m = p;
     ztask_initthread(THREAD_SOCKET);
+    ATOM_INC(&thread_ready_num);
     for (;;) {
         int r = ztask_socket_poll();
         if (r == 0)
@@ -104,10 +108,10 @@ static void thread_socket(void *p) {
 }
 //监控线程
 static void thread_monitor(void *p) {
-    struct monitor * m = p;
     int i;
     int n = m->count;
     ztask_initthread(THREAD_MONITOR);
+    ATOM_INC(&thread_ready_num);
     for (;;) {
         CHECK_ABORT
             for (i = 0; i < n; i++) {
@@ -125,8 +129,8 @@ static void thread_monitor(void *p) {
 }
 //时钟线程
 static void thread_timer(void *p) {
-    struct monitor * m = p;
     ztask_initthread(THREAD_TIMER);
+    ATOM_INC(&thread_ready_num);
     for (;;) {
         ztask_updatetime();
         CHECK_ABORT
@@ -142,7 +146,7 @@ static void thread_timer(void *p) {
         }
     }
     // wakeup socket thread
-    //ztask_socket_exit();
+    ztask_socket_exit();
     // wakeup all worker thread
     uv_mutex_lock(&m->mutex);
     m->quit = 1;
@@ -155,10 +159,10 @@ static void thread_worker(void *p) {
     struct worker_parm *wp = p;
     int id = wp->id;
     int weight = wp->weight;
-    struct monitor *m = wp->m;
     struct ztask_monitor *sm = m->m[id];
-    ztask_initthread(THREAD_WORKER);
     struct message_queue * q = NULL;
+    ztask_initthread(THREAD_WORKER);
+    ATOM_INC(&thread_ready_num);
     while (!m->quit) {
         q = ztask_context_message_dispatch(sm, q, weight);
         if (q == NULL) {
@@ -170,16 +174,15 @@ static void thread_worker(void *p) {
                 uv_cond_wait(&m->cond, &m->mutex);
             --m->sleep;
             uv_mutex_unlock(&m->mutex);
-
         }
     }
     return;
 }
 
 static void start(int thread) {
-    uv_thread_t *pid = alloca((thread + 3) * sizeof(*pid));
-
-    struct monitor *m = ztask_malloc(sizeof(*m));
+    pid = ztask_malloc((thread + 3) * sizeof(*pid));
+    thread_worker_num = thread;
+    m = ztask_malloc(sizeof(*m));
     memset(m, 0, sizeof(*m));
     m->count = thread;
     m->sleep = 0;
@@ -207,7 +210,8 @@ static void start(int thread) {
         1, 1, 1, 1, 1, 1, 1, 1,
         2, 2, 2, 2, 2, 2, 2, 2,
         3, 3, 3, 3, 3, 3, 3, 3, };
-    struct worker_parm *wp = alloca(thread * sizeof(*wp));
+    struct worker_parm *wp = ztask_malloc(thread * sizeof(*wp));
+    //启动业务线程
     for (i = 0; i < thread; i++) {
         wp[i].m = m;
         wp[i].id = i;
@@ -219,12 +223,24 @@ static void start(int thread) {
         }
         uv_thread_create(&pid[i + 3], thread_worker, &wp[i]);
     }
+    //等待线程就绪
+    while (thread_ready_num!=(thread_worker_num+3))
+    {
+#if (defined(_WIN32) || defined(_WIN64))
+        Sleep(25);
+#else
+        usleep(2500);
+#endif
+    }
+}
 
-    for (i = 0; i < thread + 3; i++) {
+void ztask_join() {
+    for (int i = 0; i < thread_worker_num + 3; i++) {
         uv_thread_join(&pid[i]);
     }
-
     free_monitor(m);
+    ztask_free(pid);
+    ztask_free(m);
 }
 //注册预置模块
 static void ztask_module_reg() {
@@ -298,6 +314,9 @@ ZTASK_EXTERN void ztask_start(struct ztask_config * config) {
         fprintf(stderr, "Can't launch %s service\n", config->logservice);
         exit(1);
     }
+
+    //启动线程
+    start(config->thread);
     //自举
     struct ztask_context *ctx = ztask_context_new(config->bootstrap, config->bootstrap_parm, config->bootstrap_parm_sz);
     if (ctx == NULL) {
@@ -306,16 +325,14 @@ ZTASK_EXTERN void ztask_start(struct ztask_config * config) {
         exit(1);
     }
 
-    //启动线程
-    start(config->thread);
 
     // harbor_exit may call socket send, so it should exit before socket_free
-    ztask_harbor_exit();
-    ztask_socket_free();
-    //退出守护进程,win暂不支持
-    if (config->daemon) {
-        daemon_exit(config->daemon);
-    }
+    //ztask_harbor_exit();
+    //ztask_socket_free();
+    ////退出守护进程,win暂不支持
+    //if (config->daemon) {
+    //    daemon_exit(config->daemon);
+    //}
 }
 
 

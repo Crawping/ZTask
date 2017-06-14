@@ -59,6 +59,8 @@ ZTASK_EXTERN void ztask_init();
 ZTASK_EXTERN void ztask_uninit();
 //启动调度器
 ZTASK_EXTERN void ztask_start(struct ztask_config * config);
+//等待调度器退出
+ZTASK_EXTERN void ztask_join();
 
 //输出调试信息
 ZTASK_EXTERN void ztask_error(struct ztask_context * context, const char *msg, ...);

@@ -68,8 +68,9 @@ struct ztask_node {
     int init;
     uint32_t monitor_exit;
     uv_key_t handle_key;
-    uv_key_t coroutine_key;//协程key
-    bool profile;	// default is off
+    uv_key_t coroutine_key_main;//主协程key
+    uv_key_t coroutine_key_cur;//当前协程key
+    bool profile;   // default is off
 };
 
 static struct ztask_node G_NODE;
@@ -96,12 +97,26 @@ uint32_t ztask_current_handle(void) {
         return v;
     }
 }
-coenv_t ztask_current_coroutine(void) {
+
+cort_t ztask_coroutine_main(void){
     if (G_NODE.init) {
-        return uv_key_get(&G_NODE.coroutine_key);
+        return uv_key_get(&G_NODE.coroutine_key_main);
     }
     return NULL;
 }
+
+cort_t ztask_coroutine_cur(cort_t cur) {
+    if (G_NODE.init) {
+        if (cur)
+        {
+            uv_key_set(&G_NODE.coroutine_key_cur, cur);
+            return NULL;
+        }
+        return uv_key_get(&G_NODE.coroutine_key_cur);
+    }
+    return NULL;
+}
+
 static void id_to_hex(char * str, uint32_t id) {
     int i;
     static char hex[16] = { '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
@@ -195,6 +210,19 @@ ztask_context_newsession(struct ztask_context *ctx) {
         return 1;
     }
     return session;
+}
+
+//为服务创建一个协程
+int ztask_coroutine_new(struct ztask_context * context) {
+
+}
+//挂起协程
+void ztask_coroutine_yield(struct ztask_context * context) {
+    coroutine_yield(uv_key_get(&G_NODE.coroutine_key_main), uv_key_get(&G_NODE.coroutine_key_cur));
+}
+//唤醒一个协程
+void ztask_coroutine_resume(struct ztask_context * context,int session) {
+
 }
 
 void
@@ -851,7 +879,11 @@ ztask_globalinit(void) {
         fprintf(stderr, "pthread_key_create failed");
         exit(1);
     }
-    if (uv_key_create(&G_NODE.coroutine_key)) {
+    if (uv_key_create(&G_NODE.coroutine_key_main)) {
+        fprintf(stderr, "pthread_key_create failed");
+        exit(1);
+    }
+    if (uv_key_create(&G_NODE.coroutine_key_cur)) {
         fprintf(stderr, "pthread_key_create failed");
         exit(1);
     }
@@ -870,12 +902,12 @@ ztask_initthread(int m) {
     uv_key_set(&G_NODE.handle_key, (void *)v);
     if (m == THREAD_WORKER) {
         //将业务线程转换成纤程
-        coenv_t s = coroutine_init();
-        if (!s) {
-            fprintf(stderr, "coroutine_init failed");
+        cort_t co = co_new_main();
+        if (!co) {
+            fprintf(stderr, "co_new_main failed");
             exit(1);
         }
-        uv_key_set(&G_NODE.coroutine_key, (void *)s);
+        uv_key_set(&G_NODE.coroutine_key_main, (void *)co);
     }
 }
 

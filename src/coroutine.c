@@ -1,5 +1,5 @@
-#include "coroutine.h"
-#include "ztask.h"
+﻿#include "coroutine.h"
+//#include "ztask.h"
 #if defined(_WIN32) || defined(_WIN64)
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
@@ -22,11 +22,10 @@ enum
     COROUTINE_RUNNING,
     COROUTINE_END,
 };
-
+//单个协程
 struct coroutine
 {
     int state;
-    coenv_t env;
     coroutine_func func;
     void *result;
     void *context;
@@ -45,8 +44,8 @@ struct coroutine
 #endif
     struct coroutine *main;
 };
-
 typedef struct coroutine * cort_t;
+
 
 #if defined(_WIN32) || defined(_WIN64)
 static void WINAPI _proxyfunc(void *p)
@@ -58,28 +57,27 @@ static void _proxyfunc(uint32_t low32, uint32_t hi32)
     uintptr_t ptr = (uintptr_t)low32 | ((uintptr_t)hi32 << 32);
     cort_t co = (cort_t)ptr;
 #endif
-    co->result = co->func(co->env, co->context, co->ud, co->type, co->session, co->source, co->msg, co->sz);
+    co->result = co->func(co->context, co->ud, co->type, co->session, co->source, co->msg, co->sz);
     co->state = COROUTINE_END;
 #if defined(_WIN32) || defined(_WIN64)
     SwitchToFiber(co->main->fiber);
 #endif
 }
 
-static cort_t co_new(coenv_t env, cort_t main, coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
+static cort_t co_new(cort_t main,coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
 {
     struct coroutine *co = ztask_malloc(sizeof(*co));
     co->state = COROUTINE_SUSPEND;
-    co->env = env;
     co->func = func;
     co->result = NULL;
     co->context = context;
-    co->main = main;
     co->ud = ud;
     co->type = type;
     co->session = session;
     co->source = source;
     co->msg = msg;
     co->sz = sz;
+    co->main = main;
 #if defined(_WIN32) || defined(_WIN64)
     co->fiber = CreateFiber(0, _proxyfunc, co);
 #else
@@ -108,30 +106,6 @@ static void co_delete(cort_t co)
     ztask_free(co);
 }
 
-static cort_t co_new_main()
-{
-    struct coroutine *co = ztask_malloc(sizeof(*co));
-    co->state = COROUTINE_RUNNING;
-    co->env = NULL;
-    co->func = NULL;
-    co->result = NULL;
-    co->context = NULL;
-
-#if defined(_WIN32) || defined(_WIN64)
-    co->fiber = ConvertThreadToFiber(NULL);
-#endif
-
-    return co;
-}
-
-static void co_delete_main(cort_t co)
-{
-#if defined(_WIN32) || defined(_WIN64)
-    ConvertFiberToThread();
-#endif
-    ztask_free(co);
-}
-
 static void co_switch(cort_t from, cort_t to)
 {
 #if defined(_WIN32) || defined(_WIN64)
@@ -141,119 +115,60 @@ static void co_switch(cort_t from, cort_t to)
 #endif
 }
 
-/************************************************************************/
-/* wrapper                                                              */
-/************************************************************************/
-struct coenviroment
-{
-    int nco;
-    int cap;
-    int running;
-    cort_t *aco;
-    cort_t main;
-};
 
-coenv_t coroutine_init()
+//安装主协程
+cort_t co_new_main()
 {
-    struct coenviroment *env = ztask_malloc(sizeof(*env));
-    env->nco = 0;
-    env->cap = 0;
-    env->running = -1;
-    env->aco = NULL;
-    env->main = co_new_main();
-    return env;
+    struct coroutine *co = ztask_malloc(sizeof(*co));
+    co->state = COROUTINE_RUNNING;
+    co->func = NULL;
+    co->result = NULL;
+    co->context = NULL;
+
+#if defined(_WIN32) || defined(_WIN64)
+    co->fiber = ConvertThreadToFiberEx(NULL, FIBER_FLAG_FLOAT_SWITCH);
+#endif
+
+    return co;
+}
+//卸载主协程
+void co_delete_main(cort_t co)
+{
+#if defined(_WIN32) || defined(_WIN64)
+    ConvertFiberToThread();
+#endif
+    ztask_free(co);
 }
 
-void coroutine_uninit(coenv_t env)
+//创建一个协程
+cort_t coroutine_new(cort_t main,coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
 {
-    int i;
-    for (i = 0; i < env->cap; i++)
+    return co_new(main, func, context, ud, type, session, source, msg, sz);
+}
+//启动协程
+void *coroutine_resume(cort_t main, cort_t co)
+{
+    if (co && co->state == COROUTINE_SUSPEND)
     {
-        cort_t co = env->aco[i];
-        if (co)
+        co->state = COROUTINE_RUNNING;
+        co_switch(main, co);
+        void *ret = co->result;
+        if (co->state == COROUTINE_END)
         {
             co_delete(co);
         }
-    }
-
-    ztask_free(env->aco);
-    co_delete_main(env->main);
-    ztask_free(env);
-}
-
-static int _insert_env(coenv_t env, cort_t co)
-{
-    int i;
-
-    if (env->nco >= env->cap)
-    {
-        int newcap = (env->cap == 0) ? 16 : env->cap * 2;
-        env->aco = ztask_realloc(env->aco, newcap * sizeof(cort_t));
-        memset(env->aco + env->cap, 0, (newcap - env->cap) * sizeof(cort_t));
-        env->cap = newcap;
-    }
-
-    for (i = 0; i < env->cap; i++)
-    {
-        int id = (i + env->nco) % env->cap;
-        if (env->aco[id] == NULL)
-        {
-            env->aco[id] = co;
-            env->nco++;
-            return id;
-        }
-    }
-
-    return -1;
-}
-
-int coroutine_new(coenv_t env, coroutine_func func, void *context, void *ud, int type, int session, uint32_t source, const void * msg, size_t sz)
-{
-    cort_t co = co_new(env, env->main, func, context, ud, type, session, source, msg, sz);
-    return _insert_env(env, co);
-}
-
-void *coroutine_resume(coenv_t env, int id)
-{
-    if (0 <= id && id < env->cap)
-    {
-        cort_t co = env->aco[id];
-        if (co && co->state == COROUTINE_SUSPEND)
-        {
-            env->running = id;
-            co->state = COROUTINE_RUNNING;
-            co_switch(env->main, co);
-            void *ret = co->result;
-            if (co->state == COROUTINE_END)
-            {
-                env->aco[id] = NULL;
-                env->nco--;
-                env->running = -1;
-                co_delete(co);
-            }
-            return ret;
-        }
+        return ret;
     }
     return NULL;
 }
-
-void *coroutine_yield(coenv_t env)
+//挂起当前协程
+void *coroutine_yield(cort_t main, cort_t co)
 {
-    int id = env->running;
-    if (0 <= id && id < env->cap)
+    if (co && co->state == COROUTINE_RUNNING)
     {
-        cort_t co = env->aco[id];
-        if (co && co->state == COROUTINE_RUNNING)
-        {
-            env->running = -1;
-            co->state = COROUTINE_SUSPEND;
-            co_switch(co, env->main);
-            return co->result;
-        }
+        co->state = COROUTINE_SUSPEND;
+        co_switch(co, main);
+        return co->result;
     }
     return NULL;
-}
-
-int coroutine_current(coenv_t env) {
-    return env->running;
 }

@@ -15,31 +15,34 @@ struct snc {
 };
 //封装异步操作
 int ztask_snc_socket_listen(struct ztask_context *ctx, const char *host, int port, int backlog) {
-    coenv_t evn = ztask_current_coroutine();
-    int id = coroutine_current(evn);
-    int ret = ztask_socket_listen(ctx, id, host, port, backlog);
+    int ret = ztask_socket_listen(ctx, ztask_coroutine_cur(NULL), host, port, backlog);
+    int cur = ztask_coroutine_cur(NULL);
+    ztask_coroutine_cur(ztask_coroutine_main());
     //连接是个异步调用,所以切出当前协程
-    coroutine_yield(evn);
+    coroutine_yield(ztask_coroutine_main(),cur);
     return ret;
 }
 void ztask_snc_socket_start(struct ztask_context *ctx, int fd) {
-    coenv_t evn = ztask_current_coroutine();
-    int id = coroutine_current(evn);
-    ztask_socket_start(ctx, id, fd);
+    ztask_socket_start(ctx, ztask_coroutine_cur(NULL), fd);
+    int cur = ztask_coroutine_cur(NULL);
+    ztask_coroutine_cur(ztask_coroutine_main());
     //连接是个异步调用,所以切出当前协程
-    coroutine_yield(evn);
+    coroutine_yield(ztask_coroutine_main(), cur);
+    int a=1;
+    return;
 }
 
 
 //转发callback
 static int _cb(struct ztask_context * context, struct snc *l, int type, int session, uint32_t source, const void * msg, size_t sz) {
     //切回请求的协程
-    coroutine_resume(ztask_current_coroutine(), session);
+    ztask_coroutine_cur(session);
+    coroutine_resume(ztask_coroutine_main(), session);
     //l->_cb(context, l->ud, type, session, source, msg, sz);
 }
 
 
-void _func(coenv_t t, void *context, void *ud, int type, int session, uint32_t source, struct ztask_snc * args, size_t sz) {
+void _func(void *context, void *ud, int type, int session, uint32_t source, struct ztask_snc * args, size_t sz) {
     return args->_init_cb(context, NULL, NULL);
 }
 static int init_cb(struct snc *l, struct ztask_context *ctx, struct ztask_snc * args, size_t sz) {
@@ -50,15 +53,17 @@ static int init_cb(struct snc *l, struct ztask_context *ctx, struct ztask_snc * 
         return -1;
     //设置回调函数
     ztask_callback(ctx, l, _cb);
-    coenv_t s = ztask_current_coroutine();
+    
+    //coenv_t s = ztask_current_coroutine();
     //创建一个协程,用来执行初始化操作,因为初始化过程不能保证没有同步操作
-    int id = coroutine_new(s, _func, ctx, l, NULL, NULL, NULL, args, sz);
+    cort_t id = coroutine_new(ztask_coroutine_main(), _func, ctx, l, NULL, NULL, NULL, args, sz);
+    ztask_coroutine_cur(id);
     //执行协程,会切出当前流程
-    void *ud = coroutine_resume(s, id);
+    void *ud = coroutine_resume(ztask_coroutine_main(), id);
     //协程执完毕,切回当前流程
     //if (!ud)
     //    return -1;
-    l->ud = ud;
+    //l->ud = ud;
     return 0;
 }
 //此回调保证在业务线程被调用
