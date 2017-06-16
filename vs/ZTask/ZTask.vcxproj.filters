@@ -28,6 +28,9 @@
     <Filter Include="libuv\include">
       <UniqueIdentifier>{13fc0fb4-a3f2-4a02-b321-77b250afbd62}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\asm">
+      <UniqueIdentifier>{9b218691-b1d4-4c09-9ddf-bd4220bc1640}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\libuv\src\fs-poll.c">
@@ -210,9 +213,6 @@
     <ClCompile Include="..\..\libuv\src\win\detect-wakeup.c">
       <Filter>libuv\src\win</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\coroutine.c">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\main.c" />
     <ClCompile Include="..\..\src\ztask_daemon.c">
       <Filter>src</Filter>
@@ -354,9 +354,6 @@
     <ClInclude Include="..\..\libuv\include\uv-win.h">
       <Filter>libuv\include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\coroutine.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\ztask.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -399,5 +396,19 @@
     <ClInclude Include="..\..\src\server\service_snc.h">
       <Filter>src\server</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\coroutine.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\..\src\asm\make_i386_ms_pe_masm.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\src\asm\make_i386_ms_pe_masm.asm">
+      <Filter>src\asm</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\asm\jump_i386_ms_pe_masm.asm">
+      <Filter>src\asm</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

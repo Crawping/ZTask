@@ -9,7 +9,6 @@
 #include "ztask_socket.h"
 #include "ztask_daemon.h"
 #include "ztask_harbor.h"
-#include "coroutine.h"
 #include "atomic.h"
 #include <uv.h>
 #include <assert.h>

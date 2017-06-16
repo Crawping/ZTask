@@ -150,7 +150,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\..\tool;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;jemalloc.lib;duktape.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ws2_32.lib;IPHLPAPI.lib;Psapi.lib;Userenv.lib;lua.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -214,7 +215,6 @@
     <ClCompile Include="..\..\libuv\src\win\util.c" />
     <ClCompile Include="..\..\libuv\src\win\winapi.c" />
     <ClCompile Include="..\..\libuv\src\win\winsock.c" />
-    <ClCompile Include="..\..\src\coroutine.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lpcap.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lpcode.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lptree.c" />
@@ -308,7 +308,23 @@
     <ClInclude Include="..\..\src\ztask_start.h" />
     <ClInclude Include="..\..\src\ztask_timer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\src\asm\make_i386_ms_pe_masm.asm">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(FileName).obj</ObjectFileName>
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ml /Fo $(IntDir)%(fileName).obj -c -coff -nologo -Zp4 -Cp -Cx /Zi /Zd /W3 -DBOOST_CONTEXT_EXPORT=EXPORT %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(fileName).obj</Outputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\src\asm\jump_i386_ms_pe_masm.asm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ml /Fo $(IntDir)%(fileName).obj -c -coff -nologo -Zp4 -Cp -Cx /Zi /Zd /W3 -DBOOST_CONTEXT_EXPORT=EXPORT %(FullPath)</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(fileName).obj</Outputs>
+    </CustomBuild>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>
