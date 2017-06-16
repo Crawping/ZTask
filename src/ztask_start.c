@@ -10,6 +10,7 @@
 #include "ztask_daemon.h"
 #include "ztask_harbor.h"
 #include "atomic.h"
+#include "coroutine.h"
 #include <uv.h>
 #include <assert.h>
 #include <stdio.h>
@@ -306,6 +307,9 @@ ZTASK_EXTERN void ztask_start(struct ztask_config * config) {
     ztask_timer_init();
     //初始化io
     ztask_socket_init();
+    //初始化协程模块
+    coroutine_init();
+
     ztask_profile_enable(config->profile);
     //查找日志服务
     struct ztask_context *logger = ztask_context_new(config->logservice, config->logger, config->logger ? strlen(config->logger) : NULL);

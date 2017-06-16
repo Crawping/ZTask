@@ -215,6 +215,7 @@
     <ClCompile Include="..\..\libuv\src\win\util.c" />
     <ClCompile Include="..\..\libuv\src\win\winapi.c" />
     <ClCompile Include="..\..\libuv\src\win\winsock.c" />
+    <ClCompile Include="..\..\src\coroutine.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lpcap.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lpcode.c" />
     <ClCompile Include="..\..\src\lualib\lpeg\lptree.c" />

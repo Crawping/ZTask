@@ -259,6 +259,9 @@
     <ClCompile Include="..\..\src\server\service_snc.c">
       <Filter>src\server</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\coroutine.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\libuv\src\heap-inl.h">
