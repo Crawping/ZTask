@@ -23,9 +23,15 @@ static int server_cb(struct ztask_context * ctx, struct snc *l, int type, int se
 }
 static int server_init(struct ztask_context * ctx, const void * msg, size_t sz) {
     //绑定端口,协程同步操作
-    int fd = ztask_snc_socket_listen(ctx, "0.0.0.0", 1234, 10);
+    int fd = 0;// ztask_snc_socket_listen(ctx, "0.0.0.0", 1234, 10);
+    for (size_t i = 0; i < 10; i++)
+    {
+        fd = ztask_snc_socket_listen(ctx, "0.0.0.0", 1234, 10);
+        //开始监听
+        ztask_snc_socket_start(ctx, fd);
+    }
     //开始监听
-    ztask_snc_socket_start(ctx, fd);
+    //ztask_snc_socket_start(ctx, fd);
     //启动客户端
     struct ztask_snc client;
     client._cb = client_cb;

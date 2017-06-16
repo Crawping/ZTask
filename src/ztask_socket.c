@@ -92,10 +92,7 @@ forward_message(int type, bool padding, struct socket_message * result) {
 
     struct ztask_message message;
     message.source = 0;
-    if (type == ZTASK_SOCKET_TYPE_CONNECT || type == ZTASK_SOCKET_TYPE_BIND)
-        message.session = result->session;
-    else
-        message.session = 0;
+    message.session = result->session;
     message.data = sm;
     message.sz = sz | ((size_t)PTYPE_SOCKET << MESSAGE_TYPE_SHIFT);
 
